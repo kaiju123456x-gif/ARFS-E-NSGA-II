@@ -1,0 +1,24 @@
+experiment:
+  outer_splits: 5
+  outer_repeats: 5
+  inner_splits: 3
+  base_seed: 2026
+  candidate_features: 30
+  label_column: label
+  group_column: group
+
+optimizer:
+  population_size: 12
+  evaluation_budget: 240
+  crossover_probability: 0.8
+  mutation_probability: 0.12
+  archive_capacity: 50
+  window_size: 10
+  rho: 0.2
+  std_floor: 1.0e-6
+  alpha: 0.35
+  monitor_interval: 5
+  mi_threshold: 0.0
+  feature_ratio_denominator: candidate
+  initialization_top_k: 10
+
