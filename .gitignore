@@ -10,6 +10,9 @@ dist/
 data/raw/
 data/processed/
 results/
+!results/
+results/*
+!results/README.md
 *.joblib
 *.pkl
 .idea/
@@ -23,5 +26,4 @@ results/
 /*.png
 /JBCB_*
 /review_*
-/修改建议_v2.md
 
