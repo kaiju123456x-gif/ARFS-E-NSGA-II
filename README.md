@@ -16,6 +16,8 @@ This repository keeps the implementation, experiment configurations, public-data
 | `tests/` | Unit and integration tests |
 | `.github/workflows/ci.yml` | Automated tests and an end-to-end reproducibility smoke run |
 | `REPRODUCIBILITY.md` | Clean-environment protocol for reproducing the experiments |
+| `CONTRIBUTING.md` | English-language, portability, testing, and data-handling requirements |
+| `CITATION.cff` | Machine-readable software citation metadata |
 
 Raw third-party files are not relicensed by this repository. The data commands retrieve the fixed public sources, validate their identities, and generate the analysis-ready matrices locally. See [`data/README.md`](data/README.md) and [`data/dataset_manifest.csv`](data/dataset_manifest.csv).
 
@@ -125,7 +127,7 @@ This repository implements the proposed method, the common NSGA-II backbone, all
 
 ## Continuous verification
 
-GitHub Actions runs under Python 3.10 and 3.11. It installs the locked environment, executes all tests, runs a deterministic end-to-end experiment, and independently audits the generated evidence. All source-code comments and public documentation are in English.
+GitHub Actions runs under Python 3.10 and 3.11. It installs the locked environment, executes all tests, runs a deterministic end-to-end experiment, and independently audits the generated evidence. The test suite also checks public text files for Chinese-language content and machine-specific absolute paths. All source-code comments, messages, metadata, and public documentation are maintained in English.
 
 ## License and data rights
 

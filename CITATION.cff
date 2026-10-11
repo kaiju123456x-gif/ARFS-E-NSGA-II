@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript and this repository."
+title: "ARFS-E-NSGA-II: Adaptive Redundancy-Aware Feature Selection with Enhanced Evolutionary Search"
+type: software
+authors:
+  - family-names: Ling
+    given-names: Qinghua
+  - family-names: Kai
+    given-names: Jun
+  - family-names: Han
+    given-names: Henry
+  - family-names: Li
+    given-names: Hongmei
+  - family-names: Han
+    given-names: Fei
+version: 0.1.0
+date-released: 2026-10-11
+repository-code: "https://github.com/kaiju123456x-gif/ARFS-E-NSGA-II"
+license: MIT
+preferred-citation:
+  type: article
+  title: "Adaptive Redundancy-Aware Feature Selection with Enhanced Evolutionary Search Based on NSGA-II"
+  authors:
+    - family-names: Ling
+      given-names: Qinghua
+    - family-names: Kai
+      given-names: Jun
+    - family-names: Han
+      given-names: Henry
+    - family-names: Li
+      given-names: Hongmei
+    - family-names: Han
+      given-names: Fei
+  year: 2026
