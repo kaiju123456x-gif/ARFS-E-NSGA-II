@@ -21,6 +21,7 @@ This repository keeps the implementation, experiment configurations, public-data
 | `CONTRIBUTING.md` | English-language, portability, testing, and data-handling requirements |
 | `CITATION.cff` | Machine-readable software citation metadata |
 | `requirements-py38-lock.txt` | Locked dependencies for the manuscript's Python 3.8 runtime |
+| `COMPARATOR_PROVENANCE.md` | Legacy-source hashes, adaptation boundary, and HMO integrity finding |
 
 Raw third-party files are not relicensed by this repository. The data commands retrieve the fixed public sources, validate their identities, and generate the analysis-ready matrices locally. See [`data/README.md`](data/README.md) and [`data/dataset_manifest.csv`](data/dataset_manifest.csv).
 
@@ -48,6 +49,9 @@ flowchart LR
 - Dynamic Partitioning and IGD-Adaptive Mutation (DPIM).
 - DPIM-guided Redundancy-aware Feature Modeling (DRFM).
 - Eight component combinations: `none`, `a`, `b`, `c`, `ab`, `ac`, `bc`, and `abc`.
+- Audited comparator cores for MOPSO, NSGA-III, FTGGA, MMODE, MOMOGS-PCE,
+  XGBoost-MOGA, HSIC Lasso, and Block HSIC Lasso, plus a paper-guided
+  HMO-NSGA-II reimplementation.
 - Repeated nested stratified CV, with group-aware splitting for linked biological samples.
 - Exact three-dimensional hypervolume with reference point `(1.1, 1.1, 1.1)`.
 - Machine-readable folds, candidate sets, seeds, diagnostics, Pareto archives, checksums, and environment metadata.
@@ -119,6 +123,24 @@ python -m arfs_ensga2.cli run --data data/processed/Colon.csv.gz --config config
 python -m arfs_ensga2.cli ablation --data data/processed/Colon.csv.gz --config configs/default.yaml --output results/colon-ablation
 ```
 
+Run the proposed method, common NSGA-II backbone, and every available audited
+comparator on exactly the same folds and candidate pools:
+
+```bash
+python -m arfs_ensga2.cli compare --data data/processed/Colon.csv.gz --config configs/default.yaml --output results/colon-comparison
+```
+
+Repeat `--method` to select a subset. The HMO-NSGA-II entry is reconstructed
+from Vijai and P. (2025), not from the unrelated RMODE-E file in the legacy
+snapshot. Paper-specified components and fair-protocol completions are separated
+in [`COMPARATOR_PROVENANCE.md`](COMPARATOR_PROVENANCE.md).
+
+Run the complete manuscript method set on all ten verified datasets:
+
+```bash
+python -m arfs_ensga2.cli paper-comparison
+```
+
 Full repeated nested-CV runs are computationally expensive. Runtime depends on hardware and the number of variants; no reduced settings are silently substituted.
 
 ## Paper-reported reference values
@@ -152,7 +174,12 @@ Every run stores these settings and its input checksum in `manifest.json`.
 
 ## Scope of the release
 
-This repository implements the proposed method, the common NSGA-II backbone, all eight proposed-component combinations, the complete data preparation workflow, and the matched nested evaluation protocol. Literature comparators remain attributable to their original implementations and publications; they are not silently reconstructed from incomplete descriptions or relicensed here. The manuscript identifies those sources and describes the common evaluation conditions used for comparison.
+This repository implements the proposed method, the common NSGA-II backbone,
+all eight proposed-component combinations, eight audited comparator cores, one
+paper-guided comparator reimplementation, the complete data preparation
+workflow, and the matched nested evaluation protocol.
+The legacy comparator adaptations and the HMO-NSGA-II reconstruction are not
+represented as original-author reference implementations.
 
 ## Continuous verification
 

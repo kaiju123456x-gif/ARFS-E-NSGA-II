@@ -15,6 +15,7 @@ from .datasets import (
     verify_processed_record,
 )
 from .experiment import ABLATIONS, create_demo_dataset, run_experiment
+from .comparators import AVAILABLE_COMPARATORS
 from .paper_experiments import run_parameter_analysis
 
 
@@ -41,6 +42,19 @@ def build_parser() -> argparse.ArgumentParser:
     ablation.add_argument("--data", required=True)
     ablation.add_argument("--config", default="configs/default.yaml")
     ablation.add_argument("--output", required=True)
+
+    compare = subparsers.add_parser(
+        "compare", help="run ARFS-E-NSGA-II and the audited available comparators"
+    )
+    compare.add_argument("--data", required=True)
+    compare.add_argument("--config", default="configs/default.yaml")
+    compare.add_argument("--output", required=True)
+    compare.add_argument(
+        "--method",
+        action="append",
+        choices=["abc", "none", *AVAILABLE_COMPARATORS],
+        help="repeat to select methods; default runs every available method",
+    )
 
     demo = subparsers.add_parser("demo", help="generate synthetic data and run a smoke experiment")
     demo.add_argument("--output", default="results/demo")
@@ -83,6 +97,13 @@ def build_parser() -> argparse.ArgumentParser:
     paper_ablation.add_argument("--data-dir", default="data/processed")
     paper_ablation.add_argument("--config", default="configs/default.yaml")
     paper_ablation.add_argument("--output", default="results/paper-ablation")
+    paper_comparison = subparsers.add_parser(
+        "paper-comparison", help="run every manuscript method on all ten datasets"
+    )
+    paper_comparison.add_argument("--data-dir", default="data/processed")
+    paper_comparison.add_argument("--config", default="configs/default.yaml")
+    paper_comparison.add_argument("--grouped-config", default="configs/grouped.yaml")
+    paper_comparison.add_argument("--output", default="results/paper-comparison")
     parameters = subparsers.add_parser(
         "paper-parameters", help="run the manuscript parameter analysis on Colon and SRBCT"
     )
@@ -128,9 +149,10 @@ def run_paper_suite(
     grouped_config: str | Path,
     include_ablation: bool,
     dataset_names: tuple[str, ...] = PAPER_DATASETS,
+    variants_override: tuple[str, ...] | None = None,
 ) -> dict[str, dict[str, object]]:
     reports: dict[str, dict[str, object]] = {}
-    variants = tuple(ABLATIONS) if include_ablation else ("abc",)
+    variants = variants_override or (tuple(ABLATIONS) if include_ablation else ("abc",))
     for name in dataset_names:
         config_path = grouped_config if name in GROUPED_DATASETS else config
         experiment, optimizer = load_config(config_path)
@@ -192,6 +214,19 @@ def main() -> None:
         )
         print(json.dumps(reports, indent=2))
         raise SystemExit(0 if all(r["status"] == "PASS" for r in reports.values()) else 1)
+    if args.command == "paper-comparison":
+        methods = ("abc", "none", *AVAILABLE_COMPARATORS)
+        reports = run_paper_suite(
+            args.data_dir,
+            args.output,
+            args.config,
+            args.grouped_config,
+            False,
+            PAPER_DATASETS,
+            methods,
+        )
+        print(json.dumps(reports, indent=2))
+        raise SystemExit(0 if all(r["status"] == "PASS" for r in reports.values()) else 1)
     if args.command == "paper-parameters":
         summary = run_parameter_analysis(args.data_dir, args.output, args.config)
         print(summary.to_json(orient="records", indent=2))
@@ -212,7 +247,10 @@ def main() -> None:
         report = audit_results(output)
         print(json.dumps(report, indent=2))
         raise SystemExit(0 if report["status"] == "PASS" else 1)
-    variants = tuple(ABLATIONS) if args.command == "ablation" else (args.variant,)
+    if args.command == "compare":
+        variants = tuple(args.method) if args.method else ("abc", "none", *AVAILABLE_COMPARATORS)
+    else:
+        variants = tuple(ABLATIONS) if args.command == "ablation" else (args.variant,)
     run_experiment(args.data, args.output, experiment, optimizer, variants=variants)
     report = audit_results(args.output)
     print(json.dumps(report, indent=2))

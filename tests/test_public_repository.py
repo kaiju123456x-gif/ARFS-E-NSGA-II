@@ -9,6 +9,7 @@ PUBLIC_ROOT_FILES = {
     "PAPER_REPRODUCIBILITY.md",
     "CONTRIBUTING.md",
     "CITATION.cff",
+    "COMPARATOR_PROVENANCE.md",
     "results/README.md",
     "pyproject.toml",
     "requirements-lock.txt",

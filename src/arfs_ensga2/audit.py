@@ -27,10 +27,19 @@ def audit_results(output_dir: str | Path) -> dict[str, object]:
     if len(splits) != expected_folds:
         errors.append(f"expected {expected_folds} split records, found {len(splits)}")
     budget = manifest["config"]["optimizer"]["evaluation_budget"]
-    if not (results["evaluations"] == budget).all():
-        errors.append("one or more runs did not use the configured evaluation budget")
-    if results.isna().any().any():
-        errors.append("fold_results.csv contains missing values")
+    budget_types = manifest.get("method_budget_types", {})
+    evolutionary = results["variant"].map(budget_types).ne("single_subset")
+    if not (results.loc[evolutionary, "evaluations"] == budget).all():
+        errors.append("one or more evolutionary runs did not use the configured evaluation budget")
+    if not (results.loc[~evolutionary, "evaluations"] == 1).all():
+        errors.append("one or more single-subset runs used an unexpected evaluation count")
+    allowed_missing = results["variant"].map(budget_types).eq("single_subset") & results[
+        "hypervolume"
+    ].isna()
+    unexpected_missing = results.isna()
+    unexpected_missing.loc[allowed_missing, "hypervolume"] = False
+    if unexpected_missing.any().any():
+        errors.append("fold_results.csv contains unexpected missing values")
     duplicate_keys = results.duplicated(["variant", "repeat", "fold"]).sum()
     if duplicate_keys:
         errors.append(f"found {duplicate_keys} duplicate run keys")

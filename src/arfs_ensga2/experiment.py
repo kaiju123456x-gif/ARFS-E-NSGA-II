@@ -21,6 +21,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from .config import ExperimentConfig, OptimizerConfig, config_dict
+from .comparators import (
+    AVAILABLE_COMPARATORS,
+    SINGLE_SUBSET_COMPARATORS,
+    run_comparator,
+)
 from .objectives import make_inner_splits
 from .optimizer import ARFSENSGA2
 from .pareto import hypervolume_3d
@@ -131,7 +136,8 @@ def run_experiment(
     output_dir.mkdir(parents=True, exist_ok=True)
     X, y, groups, feature_names = load_csv_dataset(data_path, experiment_config)
     variants = [variant.lower() for variant in variants]
-    invalid = sorted(set(variants) - set(ABLATIONS))
+    valid_methods = set(ABLATIONS) | set(AVAILABLE_COMPARATORS)
+    invalid = sorted(set(variants) - valid_methods)
     if invalid:
         raise ValueError(f"unknown variants: {invalid}")
     rows: list[dict[str, object]] = []
@@ -172,32 +178,46 @@ def run_experiment(
             }
         )
         for variant in variants:
-            guided, dpim, drfm = ABLATIONS[variant]
             # Paired comparisons use exactly the same stochastic seed for every variant.
             run_seed = experiment_config.base_seed + repeat * 10_000 + fold
-            optimizer = ARFSENSGA2(
-                optimizer_config,
-                guided_initialization=guided,
-                dpim=dpim,
-                drfm=drfm,
-                random_state=run_seed,
-            )
             started = time.perf_counter()
-            result = optimizer.fit(
-                X_train,
-                y[train],
-                inner,
-                original_dimension=X.shape[1],
-            )
+            if variant in ABLATIONS:
+                guided, dpim, drfm = ABLATIONS[variant]
+                optimizer = ARFSENSGA2(
+                    optimizer_config,
+                    guided_initialization=guided,
+                    dpim=dpim,
+                    drfm=drfm,
+                    random_state=run_seed,
+                )
+                result = optimizer.fit(
+                    X_train,
+                    y[train],
+                    inner,
+                    original_dimension=X.shape[1],
+                )
+            else:
+                result = run_comparator(
+                    variant,
+                    X_train,
+                    y[train],
+                    inner,
+                    optimizer_config,
+                    X.shape[1],
+                    run_seed,
+                )
             selected_local = np.flatnonzero(result.endpoint_mask)
             model = KNeighborsClassifier(n_neighbors=min(3, len(train)), weights="distance")
             model.fit(X_train[:, selected_local], y[train])
             prediction = model.predict(X_test[:, selected_local])
-            transformed_archive = result.archive_objectives.copy()
-            transformed_archive[:, 2] = transformed_archive[:, 2] / (
-                1.0 + transformed_archive[:, 2]
-            )
-            hv = hypervolume_3d(transformed_archive, np.array([1.1, 1.1, 1.1]))
+            if variant in SINGLE_SUBSET_COMPARATORS:
+                hv = float("nan")
+            else:
+                transformed_archive = result.archive_objectives.copy()
+                transformed_archive[:, 2] = transformed_archive[:, 2] / (
+                    1.0 + transformed_archive[:, 2]
+                )
+                hv = hypervolume_3d(transformed_archive, np.array([1.1, 1.1, 1.1]))
             runtime = time.perf_counter() - started
             selected_original = candidate_indices[selected_local]
             row = {
@@ -276,6 +296,14 @@ def run_experiment(
         "missing_values": int(np.isnan(X).sum()),
         "grouped": groups is not None,
         "variants": variants,
+        "method_budget_types": {
+            variant: (
+                "single_subset"
+                if variant in SINGLE_SUBSET_COMPARATORS
+                else "objective_evaluations"
+            )
+            for variant in variants
+        },
         "config": config_dict(experiment_config, optimizer_config),
         "environment": {
             "python": sys.version,

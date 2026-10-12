@@ -29,3 +29,10 @@ def test_paper_parameter_defaults() -> None:
 
     assert args.data_dir == "data/processed"
     assert args.output == "results/paper-parameters"
+
+
+def test_paper_comparison_defaults() -> None:
+    args = build_parser().parse_args(["paper-comparison"])
+
+    assert args.data_dir == "data/processed"
+    assert args.output == "results/paper-comparison"

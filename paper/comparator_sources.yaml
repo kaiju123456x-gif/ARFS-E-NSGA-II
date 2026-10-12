@@ -1,0 +1,50 @@
+provenance:
+  snapshot: E-NSGA-2-plus
+  version_controlled: false
+  source_license_present: false
+  interpretation: Author-held legacy experiment code adapted to the shared protocol.
+
+methods:
+  mopso:
+    source: experiments/baselines/mopso_baseline.py
+    sha256: 3f60f0d97660100c8352d5b2220f72c44b740dec8cb1a5b327aa10922eeaeda3
+    status: adapted
+  nsga3:
+    source: experiments/baselines/nsga3_baseline.py
+    sha256: 4ea2526622837a7732b0093df5ec28823340aa218c74af359a108cfff613d08b
+    status: adapted
+  ftgga:
+    source: experiments/ftgga/ftgga.py
+    sha256: 1eecf2d4816559b01adae76fa62daa3fad2692c2ff767f80df02cb7e9ffc1459
+    status: adapted
+  mmode:
+    source: experiments/mmode/mmode.py
+    sha256: 37e6ba9ccfc1112b555649020d62ceef5928ef8ccd0b6351e7644459a4e607b4
+    status: adapted
+  momogs-pce:
+    source: experiments/revision_suite_20260918/fork_momogs_pce.py
+    sha256: 94c0dc5933dfd59d0232e19aee5787b45a11b7d256174aec13cd384645c76ef4
+    status: adapted
+  xgboost-moga:
+    source: experiments/xgb_moga/xgb_moga.py
+    sha256: fe43a3c7cad76448cdf5124911de2383edf8e7df5ce75e2fab55ba059598992f
+    status: adapted
+  hsic-lasso:
+    source: experiments/revision_suite_20260918/hsic.py
+    sha256: f9c4b8a789f52833baa632c362f5f8d05a35d244d226981788f7a518e4ed778b
+    status: adapted
+  block-hsic-lasso:
+    source: experiments/revision_suite_20260918/hsic.py
+    sha256: f9c4b8a789f52833baa632c362f5f8d05a35d244d226981788f7a518e4ed778b
+    status: adapted
+  hmo-nsga-ii:
+    source: https://doi.org/10.1016/j.dajour.2025.100550
+    sha256: null
+    status: paper-guided-reimplementation
+    integrity_note: RMODE-E was not reused or relabelled.
+    fair_protocol_completions:
+      - equal-weight normalized score aggregation because SVM-Rank training preferences and threshold were not specified
+      - continuous fused scores in place of the unspecified ranking threshold
+      - majority then score-probability rule for the text-described three-parent crossover
+      - shared crossover and mutation probabilities
+      - shared three-objective evaluator and evaluation budget

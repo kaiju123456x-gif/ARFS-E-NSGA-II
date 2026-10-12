@@ -32,6 +32,7 @@ code_and_data_scope:
     - nested evaluation wrapper
     - integrity audit
     - automated tests
-  excluded:
-    - external literature baseline implementations
-  external_baseline_instruction: Integrate the original versioned implementations.
+    - eight audited comparator-core adaptations
+    - paper-guided HMO-NSGA-II reimplementation
+  excluded: []
+  external_baseline_instruction: Preserve provenance and distinguish legacy adaptations from paper-guided reimplementations.

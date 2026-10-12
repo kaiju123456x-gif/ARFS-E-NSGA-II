@@ -15,6 +15,7 @@ This file maps every experimental claim in the manuscript to a public, inspectab
 | One-factor and interaction parameter analysis | `paper/experiment_contract.yaml`, `src/arfs_ensga2/paper_experiments.py` | `python -m arfs_ensga2.cli paper-parameters` |
 | Reported aggregate targets and interpretation limits | `paper/reported_results.yaml` | Compare against newly generated `summary.csv` files |
 | Output integrity | `src/arfs_ensga2/audit.py` | `python -m arfs_ensga2.cli audit --output <directory>` |
+| Available comparator implementations | `src/arfs_ensga2/comparators.py`, `COMPARATOR_PROVENANCE.md` | `python -m arfs_ensga2.cli paper-comparison` |
 
 ## Evidence produced by each run
 
@@ -30,4 +31,10 @@ This file maps every experimental claim in the manuscript to a public, inspectab
 
 ## Comparator provenance
 
-The manuscript compares ARFS-E-NSGA-II with MOPSO, NSGA-II, NSGA-III, HMO-NSGA-II, FTGGA, MMODE, MOMOGS-PCE, XGBoost-MOGA, HSIC Lasso, and Block HSIC Lasso. The repository must not relabel results from different datasets or present reconstructed methods as original-author implementations. Any comparator added to the release must record its publication, source URL or exact implementation description, version or commit, license, parameter mapping, and execution command.
+The manuscript compares ARFS-E-NSGA-II with MOPSO, NSGA-II, NSGA-III,
+HMO-NSGA-II, FTGGA, MMODE, MOMOGS-PCE, XGBoost-MOGA, HSIC Lasso, and Block
+HSIC Lasso. Eight audited legacy comparator cores and a paper-guided HMO-NSGA-II
+reimplementation are integrated behind the same evaluation interface.
+`COMPARATOR_PROVENANCE.md` records the exact legacy input-file hashes, the
+adaptation boundary, the HMO paper source, and every fair-protocol completion.
+The unrelated RMODE-E implementation is never relabelled as HMO-NSGA-II.
