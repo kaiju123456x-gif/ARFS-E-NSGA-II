@@ -37,4 +37,7 @@ HSIC Lasso. Eight audited legacy comparator cores and a paper-guided HMO-NSGA-II
 reimplementation are integrated behind the same evaluation interface.
 `COMPARATOR_PROVENANCE.md` records the exact legacy input-file hashes, the
 adaptation boundary, the HMO paper source, and every fair-protocol completion.
-The unrelated RMODE-E implementation is never relabelled as HMO-NSGA-II.
+The unrelated RMODE-E implementation is never relabelled as HMO-NSGA-II. These
+repository-native adaptations do not redistribute or claim to be the original
+authors' third-party source packages; they were added after the cited manuscript
+PDF was exported so that reviewers can execute the complete comparison locally.

@@ -32,7 +32,8 @@ code_and_data_scope:
     - nested evaluation wrapper
     - integrity audit
     - automated tests
+  repository_extensions_after_manuscript_export:
     - eight audited comparator-core adaptations
     - paper-guided HMO-NSGA-II reimplementation
-  excluded: []
-  external_baseline_instruction: Preserve provenance and distinguish legacy adaptations from paper-guided reimplementations.
+  third_party_source_code_redistributed: false
+  external_baseline_instruction: Repository-native adaptations must be distinguished from official original-author implementations.

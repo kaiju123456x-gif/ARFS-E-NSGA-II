@@ -4,7 +4,12 @@ from pathlib import Path
 import yaml
 
 from arfs_ensga2.cli import GROUPED_DATASETS, PAPER_DATASETS
+from arfs_ensga2.comparators import (
+    EVOLUTIONARY_COMPARATORS,
+    SINGLE_SUBSET_COMPARATORS,
+)
 from arfs_ensga2.config import load_config
+from arfs_ensga2.experiment import METHOD_LABELS
 from arfs_ensga2.paper_experiments import INTERACTIONS, ONE_FACTOR_VALUES, parameter_settings
 
 
@@ -73,3 +78,20 @@ def test_ablation_labels_match_repository_variants() -> None:
     assert [item["paper_label"] for item in contract["ablation"]["variants"]] == [
         "BASE", "A", "B", "C", "AB", "AC", "BC", "ABC"
     ]
+
+
+def test_comparison_registry_matches_manuscript_method_set() -> None:
+    contract = yaml.safe_load(
+        (ROOT / "paper" / "experiment_contract.yaml").read_text(encoding="utf-8")
+    )
+    evolutionary_ids = (
+        "mopso", "none", "nsga3", "hmo-nsga-ii", "ftgga", "mmode",
+        "momogs-pce", "xgboost-moga", "abc",
+    )
+    assert [METHOD_LABELS[item] for item in evolutionary_ids] == contract[
+        "comparison_methods"
+    ]["multi_objective"]
+    assert set(EVOLUTIONARY_COMPARATORS) == set(evolutionary_ids) - {"none", "abc"}
+    assert [METHOD_LABELS[item] for item in SINGLE_SUBSET_COMPARATORS] == contract[
+        "comparison_methods"
+    ]["single_subset"]

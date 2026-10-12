@@ -36,11 +36,29 @@ imported. The current repository supplies all methods with the same:
 HSIC Lasso and Block HSIC Lasso return a single tuned subset, so hypervolume is
 not defined for them and the evolutionary evaluation budget does not apply.
 
-MMODE's two views are rebuilt from ANOVA F and mutual-information rankings using
+MMODE's two views are rebuilt from ReliefF and mutual-information rankings using
 only the current outer-training fold. XGBoost-MOGA requires XGBoost and fails
 explicitly if that dependency is unavailable; it never substitutes another
 model. MOMOGS-PCE uses four exhaustive, non-overlapping subspaces even when the
 candidate dimension is not divisible by four.
+
+## Manuscript-alignment matrix
+
+The manuscript is authoritative for the experimental wrapper. The hashed
+legacy snapshot supplies only method-specific search structure where the
+manuscript says that source-specific variation and selection operators were
+retained.
+
+| Layer | Preserved from method implementation | Controlled by the manuscript wrapper |
+|---|---|---|
+| MOPSO | binary velocity update and external leader archive | candidate pool, objectives, folds, seeds, 240-call budget |
+| NSGA-III | reference-direction niching | common binary search space and evaluator |
+| HMO-NSGA-II | three rankers, guided initialization, three-parent crossover, guided add/remove mutation | explicitly documented completions plus common wrapper |
+| FTGGA | feature thresholds, threshold update, core-preserving crossover | common candidate pool, objectives, and budget |
+| MMODE | ReliefF/MI tasks, binary DE, cross-task transfer | same 30-feature input and evaluation protocol |
+| MOMOGS-PCE | four subspaces, exploration, core reinforcement, trait exchange, global utilization | same evaluator and call budget |
+| XGBoost-MOGA | XGBoost importance gate and genetic search | fixed KNN objective/test classifier and common wrapper |
+| HSIC baselines | feature-wise kernel Lasso and optional block estimation | paper grids, inner folds, outer protocol, and 250-sample cap |
 
 ## HMO-NSGA-II paper-guided reimplementation
 

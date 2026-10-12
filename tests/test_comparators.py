@@ -66,6 +66,20 @@ def test_hmo_is_a_runnable_paper_guided_reimplementation(comparison_case):
     assert result.diagnostics["fair_protocol_completions"]
 
 
+def test_mmode_retains_the_paper_run_source_views(comparison_case):
+    X, y, splits, config = comparison_case
+    result = run_comparator("mmode", X, y, splits, config, X.shape[1], 7)
+    assert result.diagnostics["views"] == ["relieff", "mutual_information"]
+
+
+@pytest.mark.parametrize("method", SINGLE_SUBSET_COMPARATORS)
+def test_hsic_uses_the_manuscript_kernel_cap(method, comparison_case):
+    X, y, splits, config = comparison_case
+    result = run_comparator(method, X, y, splits, config, X.shape[1], 7)
+    assert result.diagnostics["kernel_sample_cap"] == 250
+    assert result.diagnostics["kernel_samples_used"] == len(X)
+
+
 def test_registry_contains_only_runnable_methods():
     assert "hmo-nsga-ii" in AVAILABLE_COMPARATORS
 

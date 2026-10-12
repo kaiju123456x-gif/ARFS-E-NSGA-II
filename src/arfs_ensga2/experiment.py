@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
 import platform
 import sys
@@ -40,6 +41,26 @@ ABLATIONS: dict[str, tuple[bool, bool, bool]] = {
     "ac": (True, False, True),
     "bc": (False, True, True),
     "abc": (True, True, True),
+}
+
+METHOD_LABELS: dict[str, str] = {
+    "none": "NSGA-II",
+    "a": "ARFS-E-NSGA-II (A)",
+    "b": "ARFS-E-NSGA-II (B)",
+    "c": "ARFS-E-NSGA-II (C)",
+    "ab": "ARFS-E-NSGA-II (AB)",
+    "ac": "ARFS-E-NSGA-II (AC)",
+    "bc": "ARFS-E-NSGA-II (BC)",
+    "abc": "ARFS-E-NSGA-II",
+    "mopso": "MOPSO",
+    "nsga3": "NSGA-III",
+    "hmo-nsga-ii": "HMO-NSGA-II",
+    "ftgga": "FTGGA",
+    "mmode": "MMODE",
+    "momogs-pce": "MOMOGS-PCE",
+    "xgboost-moga": "XGBoost-MOGA",
+    "hsic-lasso": "HSIC Lasso",
+    "block-hsic-lasso": "Block HSIC Lasso",
 }
 
 
@@ -162,21 +183,34 @@ def run_experiment(
             for inner_train, inner_valid in inner:
                 if set(fold_groups[inner_train]) & set(fold_groups[inner_valid]):
                     raise RuntimeError("group leakage detected in inner split")
-        split_records.append(
-            {
-                "repeat": repeat,
-                "fold": fold,
-                "split_seed": split_seed,
-                "inner_seed": inner_seed,
-                "train_indices": train.tolist(),
-                "test_indices": test.tolist(),
-                "inner_splits_relative_to_outer_train": [
-                    {"train": a.tolist(), "validation": b.tolist()} for a, b in inner
-                ],
-                "candidate_indices": candidate_indices.tolist(),
-                "candidate_names": [feature_names[index] for index in candidate_indices],
+        split_record = {
+            "repeat": repeat,
+            "fold": fold,
+            "split_seed": split_seed,
+            "inner_seed": inner_seed,
+            "train_indices": train.tolist(),
+            "test_indices": test.tolist(),
+            "inner_splits_relative_to_outer_train": [],
+            "candidate_indices": candidate_indices.tolist(),
+            "candidate_names": [feature_names[index] for index in candidate_indices],
+            "outer_group_overlap_count": 0,
+        }
+        for inner_train, inner_valid in inner:
+            inner_record = {
+                "train": inner_train.tolist(),
+                "validation": inner_valid.tolist(),
+                "group_overlap_count": 0,
             }
-        )
+            if fold_groups is not None:
+                inner_record["group_overlap_count"] = len(
+                    set(fold_groups[inner_train]) & set(fold_groups[inner_valid])
+                )
+            split_record["inner_splits_relative_to_outer_train"].append(inner_record)
+        if groups is not None:
+            split_record["outer_group_overlap_count"] = len(
+                set(groups[train]) & set(groups[test])
+            )
+        split_records.append(split_record)
         for variant in variants:
             # Paired comparisons use exactly the same stochastic seed for every variant.
             run_seed = experiment_config.base_seed + repeat * 10_000 + fold
@@ -222,6 +256,8 @@ def run_experiment(
             selected_original = candidate_indices[selected_local]
             row = {
                 "variant": variant,
+                "method_id": variant,
+                "method": METHOD_LABELS[variant],
                 "repeat": repeat,
                 "fold": fold,
                 "seed": run_seed,
@@ -246,6 +282,8 @@ def run_experiment(
                 archive_records.append(
                     {
                         "variant": variant,
+                        "method_id": variant,
+                        "method": METHOD_LABELS[variant],
                         "repeat": repeat,
                         "fold": fold,
                         "archive_index": archive_index,
@@ -269,7 +307,7 @@ def run_experiment(
         json.dumps(split_records, indent=2), encoding="utf-8"
     )
     summary = (
-        result_frame.groupby("variant")[
+        result_frame.groupby(["variant", "method"])[
             [
                 "accuracy",
                 "balanced_accuracy",
@@ -296,6 +334,10 @@ def run_experiment(
         "missing_values": int(np.isnan(X).sum()),
         "grouped": groups is not None,
         "variants": variants,
+        "methods": [
+            {"method_id": variant, "method": METHOD_LABELS[variant]}
+            for variant in variants
+        ],
         "method_budget_types": {
             variant: (
                 "single_subset"
@@ -311,6 +353,11 @@ def run_experiment(
             "numpy": np.__version__,
             "pandas": pd.__version__,
             "scikit_learn": sklearn.__version__,
+            "xgboost": (
+                importlib.metadata.version("xgboost")
+                if "xgboost-moga" in variants
+                else None
+            ),
         },
     }
     (output_dir / "manifest.json").write_text(

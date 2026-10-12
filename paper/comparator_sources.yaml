@@ -6,38 +6,57 @@ provenance:
 
 methods:
   mopso:
+    manuscript_reference: 35
+    literature: Coello and Lechuga, CEC 2002, pp. 1051-1056
     source: experiments/baselines/mopso_baseline.py
     sha256: 3f60f0d97660100c8352d5b2220f72c44b740dec8cb1a5b327aa10922eeaeda3
     status: adapted
   nsga3:
+    manuscript_reference: 13
+    literature: Deb and Jain, IEEE Transactions on Evolutionary Computation 18(4), 2014
     source: experiments/baselines/nsga3_baseline.py
     sha256: 4ea2526622837a7732b0093df5ec28823340aa218c74af359a108cfff613d08b
     status: adapted
   ftgga:
+    manuscript_reference: 36
+    literature_url: https://doi.org/10.1016/j.asoc.2023.110765
     source: experiments/ftgga/ftgga.py
     sha256: 1eecf2d4816559b01adae76fa62daa3fad2692c2ff767f80df02cb7e9ffc1459
     status: adapted
   mmode:
+    manuscript_reference: 11
+    literature: Li et al., Expert Systems with Applications 241, 122701, 2024
     source: experiments/mmode/mmode.py
     sha256: 37e6ba9ccfc1112b555649020d62ceef5928ef8ccd0b6351e7644459a4e607b4
     status: adapted
+    retained_mechanisms: [relieff_task, mutual_information_task, binary_de, cross_task_transfer]
   momogs-pce:
+    manuscript_reference: 37
+    literature: Li et al., Computers in Biology and Medicine 170, 108089, 2024
     source: experiments/revision_suite_20260918/fork_momogs_pce.py
     sha256: 94c0dc5933dfd59d0232e19aee5787b45a11b7d256174aec13cd384645c76ef4
     status: adapted
+    retained_mechanisms: [four_subspaces, exploration_phase, core_reinforcement, trait_exchange, global_utilization]
   xgboost-moga:
+    manuscript_reference: 38
+    literature: Deng et al., Medical and Biological Engineering and Computing 60(3), 2022
     source: experiments/xgb_moga/xgb_moga.py
     sha256: fe43a3c7cad76448cdf5124911de2383edf8e7df5ce75e2fab55ba059598992f
     status: adapted
   hsic-lasso:
+    manuscript_reference: 31
+    literature: Yamada et al., Neural Computation 26(1), 2014
     source: experiments/revision_suite_20260918/hsic.py
     sha256: f9c4b8a789f52833baa632c362f5f8d05a35d244d226981788f7a518e4ed778b
     status: adapted
   block-hsic-lasso:
+    manuscript_reference: 32
+    literature: Climente-Gonzalez et al., Bioinformatics 35(14), 2019
     source: experiments/revision_suite_20260918/hsic.py
     sha256: f9c4b8a789f52833baa632c362f5f8d05a35d244d226981788f7a518e4ed778b
     status: adapted
   hmo-nsga-ii:
+    manuscript_reference: 10
     source: https://doi.org/10.1016/j.dajour.2025.100550
     sha256: null
     status: paper-guided-reimplementation

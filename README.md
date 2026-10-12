@@ -56,6 +56,21 @@ flowchart LR
 - Exact three-dimensional hypervolume with reference point `(1.1, 1.1, 1.1)`.
 - Machine-readable folds, candidate sets, seeds, diagnostics, Pareto archives, checksums, and environment metadata.
 
+### What population size 12 means
+
+Population size is the number of candidate feature subsets maintained by an
+evolutionary optimizer; it is **not** the number of biological samples used.
+With the paper configuration, each individual is a 30-bit mask over the
+training-fold candidate pool. Every mask is evaluated using all samples in the
+outer-training fold through three-fold inner cross-validation.
+
+| Quantity | Paper value | Meaning |
+|---|---:|---|
+| Candidate features | 30 | Length of each binary feature-selection mask |
+| Population size | 12 | Candidate masks maintained in one generation |
+| Evaluation budget | 240 | Total objective calls per evolutionary run |
+| Training samples | Dataset/fold dependent | All outer-training samples participate in inner-CV evaluation |
+
 ## Five-minute verification
 
 Python 3.10 or 3.11 is recommended.
@@ -171,6 +186,9 @@ The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43`
 | Linked samples | The same group identifier is excluded across both outer and inner folds |
 
 Every run stores these settings and its input checksum in `manifest.json`.
+The result tables retain the machine-facing `variant` identifier and also add
+the manuscript-facing `method` label, preventing identifiers such as `abc` and
+`none` from being mistaken for method names.
 
 ## Scope of the release
 

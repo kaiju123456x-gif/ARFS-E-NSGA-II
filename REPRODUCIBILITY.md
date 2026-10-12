@@ -92,7 +92,19 @@ Stochastic components derive from the stored base seed and fold/variant identifi
 
 ## 7. Third-party comparators
 
-This repository does not relicense third-party implementations. It reproduces ARFS-E-NSGA-II, its common NSGA-II backbone, all eight proposed-component combinations, and the shared data/evaluation pipeline. Literature comparators should be obtained from their original authors and run with the matched folds, candidate pool, objective evaluator, seeds, and budget described in the manuscript.
+This repository does not copy or relicense third-party source packages. It
+contains repository-native comparator cores adapted from the author's hashed
+legacy experiment snapshot, plus the explicitly documented paper-guided
+HMO-NSGA-II reimplementation. These are not represented as official reference
+implementations from the original algorithm authors. The adaptation boundary,
+source hashes, literature references, and underspecified choices are recorded
+in `COMPARATOR_PROVENANCE.md` and `paper/comparator_sources.yaml`.
+
+All comparator cores receive the manuscript's matched folds, 30-feature
+training-only candidate pool, three-objective evaluator, seeds, endpoint rule,
+and stopping protocol. HSIC Lasso and Block HSIC Lasso are the manuscript's
+single-subset exceptions and therefore do not receive the 240-call evolutionary
+budget.
 
 ## 8. Reproduction issues
 
