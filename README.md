@@ -17,6 +17,7 @@ This repository keeps the implementation, experiment configurations, public-data
 | `.github/workflows/ci.yml` | Automated tests and an end-to-end reproducibility smoke run |
 | `REPRODUCIBILITY.md` | Clean-environment protocol for reproducing the experiments |
 | `PAPER_REPRODUCIBILITY.md` | Direct map from manuscript claims to code, commands, and evidence |
+| `ABLATION_AND_PARAMETER_ANALYSIS.md` | A/B/C definitions, parameter meanings, tested grids, run counts, outputs, and evidence limits |
 | `paper/` | Machine-readable Table I identities, experimental contract, and reported aggregate targets |
 | `CONTRIBUTING.md` | English-language, portability, testing, and data-handling requirements |
 | `CITATION.cff` | Machine-readable software citation metadata |
@@ -119,6 +120,10 @@ Reproduce the paper's eight-pattern ablation on Colon and SRBCT:
 python -m arfs_ensga2.cli paper-ablation
 ```
 
+The component packages, all eight activation patterns, controlled variables,
+and output layout are documented in
+[`ABLATION_AND_PARAMETER_ANALYSIS.md`](ABLATION_AND_PARAMETER_ANALYSIS.md).
+
 The broader `suite --ablation` command remains available for an additional, non-paper ablation across all ten datasets.
 
 Reproduce the paper's one-factor and two-factor parameter analysis on Colon and SRBCT:
@@ -128,6 +133,9 @@ python -m arfs_ensga2.cli paper-parameters
 ```
 
 This writes a machine-readable `parameter_analysis_summary.csv` plus the complete fold-level evidence for every setting.
+The same analysis guide defines every parameter, default, tested value, two-factor
+grid, run count, and the boundary between fresh evidence and manuscript-reported
+presentation artifacts.
 
 The suite automatically uses `configs/grouped.yaml` for `Breast_cancer_2`, `Pancreatic_Cancer`, and `Lung_Adenocarcinoma`, and `configs/default.yaml` for the other datasets. Each dataset directory is audited before the command returns successfully.
 
