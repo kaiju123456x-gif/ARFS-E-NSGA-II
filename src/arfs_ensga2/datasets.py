@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import gzip
 import hashlib
+import io
 import json
 import re
 import shutil
@@ -100,6 +101,56 @@ LEGACY_SPECS: dict[str, LegacySpec] = {
         "Upstream repository does not declare a data license; download only",
     ),
 }
+
+
+def write_reproducible_csv_gz(frame: pd.DataFrame, path: str | Path) -> Path:
+    """Write a byte-reproducible gzip CSV without timestamp or filename metadata."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as raw_handle:
+        with gzip.GzipFile(
+            filename="", fileobj=raw_handle, mode="wb", mtime=0
+        ) as gzip_handle:
+            with io.TextIOWrapper(gzip_handle, encoding="utf-8", newline="") as text_handle:
+                frame.to_csv(text_handle, index=False, lineterminator="\n")
+    return path
+
+
+def load_processed_checksums(manifest_path: str | Path) -> dict[str, str]:
+    """Load the expected analysis-ready dataset hashes from the public manifest."""
+    manifest_path = Path(manifest_path)
+    with manifest_path.open("r", encoding="utf-8", newline="") as handle:
+        rows = csv.DictReader(handle)
+        required = {"dataset", "processed_sha256"}
+        if rows.fieldnames is None or not required.issubset(rows.fieldnames):
+            raise ValueError(
+                f"dataset manifest must contain columns {sorted(required)}: {manifest_path}"
+            )
+        checksums = {
+            row["dataset"].strip(): row["processed_sha256"].strip().lower()
+            for row in rows
+        }
+    if not checksums or any(not re.fullmatch(r"[0-9a-f]{64}", value) for value in checksums.values()):
+        raise ValueError(f"dataset manifest contains an invalid SHA-256 value: {manifest_path}")
+    return checksums
+
+
+def verify_processed_record(
+    record: dict[str, object], expected_checksums: dict[str, str]
+) -> None:
+    """Fail when a prepared matrix does not match the repository manifest."""
+    spec = record.get("spec")
+    if not isinstance(spec, dict) or not isinstance(spec.get("public_name"), str):
+        raise ValueError("prepared dataset record is missing spec.public_name")
+    dataset = spec["public_name"]
+    expected = expected_checksums.get(dataset)
+    actual = record.get("output_sha256")
+    if expected is None:
+        raise ValueError(f"dataset is missing from checksum manifest: {dataset}")
+    if actual != expected:
+        raise ValueError(
+            f"{dataset} processed checksum mismatch: {actual}; expected {expected}"
+        )
 
 
 def _bucket(accession: str) -> str:
@@ -340,14 +391,14 @@ def prepare_geo_dataset(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{spec.public_name}.csv.gz"
-    sample_by_feature.to_csv(output_path, index=False, compression="gzip")
+    write_reproducible_csv_gz(sample_by_feature, output_path)
     record: dict[str, object] = {
         "spec": asdict(spec),
         "sources": [
-            {"url": url, "path": str(path.resolve()), "sha256": sha256(path)}
+            {"url": url, "path": path.name, "sha256": sha256(path)}
             for path, url in sources
         ],
-        "output_path": str(output_path.resolve()),
+        "output_path": output_path.name,
         "output_sha256": sha256(output_path),
         "shape": {"samples": sample_by_feature.shape[0], "features": spec.expected_features},
         "class_counts": sample_by_feature["label"].value_counts().sort_index().to_dict(),
@@ -416,11 +467,11 @@ def prepare_legacy_dataset(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{name}.csv.gz"
-    output.to_csv(output_path, index=False, compression="gzip")
+    write_reproducible_csv_gz(output, output_path)
     record: dict[str, object] = {
         "spec": asdict(spec),
-        "source": {"url": spec.url, "path": str(path.resolve()), "sha256": actual_hash},
-        "output_path": str(output_path.resolve()),
+        "source": {"url": spec.url, "path": path.name, "sha256": actual_hash},
+        "output_path": output_path.name,
         "output_sha256": sha256(output_path),
         "shape": {"samples": features.shape[0], "features": features.shape[1]},
         "class_counts": labels.value_counts().sort_index().to_dict(),

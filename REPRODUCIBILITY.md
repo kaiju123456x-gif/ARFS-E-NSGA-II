@@ -4,7 +4,7 @@ This protocol connects public data sources, processed matrices, experiment confi
 
 ## 1. Clean environment
 
-Use Python 3.10 or 3.11 in a fresh virtual environment.
+Use a fresh virtual environment. The manuscript reports Python 3.8; Python 3.10 and 3.11 are also continuously tested.
 
 ```bash
 git clone https://github.com/kaiju123456x-gif/ARFS-E-NSGA-II.git
@@ -16,9 +16,11 @@ Activate `.venv`, then run:
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -r requirements-lock.txt
+# Python 3.8:
+python -m pip install -r requirements-py38-lock.txt
+# For Python 3.10 or 3.11 instead:
+# python -m pip install -r requirements-lock.txt
 python -m pip install -e . --no-deps
-python -m pip install "openpyxl==3.1.5"
 ```
 
 ## 2. Installation check
@@ -33,12 +35,19 @@ All tests must pass, both commands must exit with code 0, and the audit must rep
 
 ## 3. Data retrieval and verification
 
+The complete proposed-method workflow can be launched from a clean clone with:
+
 ```bash
-python -m arfs_ensga2.cli prepare-geo --accession all
-python -m arfs_ensga2.cli prepare-legacy --dataset all
+python -m arfs_ensga2.cli reproduce
 ```
 
-Compare every generated processed checksum with `data/dataset_manifest.csv`. Required linked-sample group counts are 52 for Breast_cancer_2, 36 for Pancreatic_Cancer, and 74 for Lung_Adenocarcinoma.
+The remaining sections show the same workflow as separate, inspectable stages.
+
+```bash
+python -m arfs_ensga2.cli prepare-data
+```
+
+The command automatically compares every generated processed checksum with `data/dataset_manifest.csv` and fails on a mismatch. Required linked-sample group counts are 52 for Breast_cancer_2, 36 for Pancreatic_Cancer, and 74 for Lung_Adenocarcinoma.
 
 ## 4. Paper configuration
 
@@ -48,10 +57,16 @@ python -m arfs_ensga2.cli suite --data-dir data/processed --output results/paper
 
 The configuration uses five outer folds repeated five times, three inner folds, base seed 2026, a 30-feature training-fold candidate pool, population size 12, evaluation budget 240, and variant `abc`. Group-aware inner and outer folds are used for linked samples. No outer-test information is used to impute, scale, screen, initialize, or optimize.
 
-Run all eight component combinations with:
+Run the paper's eight component combinations on Colon and SRBCT with:
 
 ```bash
-python -m arfs_ensga2.cli suite --data-dir data/processed --output results/paper-ablation --ablation
+python -m arfs_ensga2.cli paper-ablation
+```
+
+Run the one-factor and interaction parameter analysis with:
+
+```bash
+python -m arfs_ensga2.cli paper-parameters
 ```
 
 ## 5. Evidence audit

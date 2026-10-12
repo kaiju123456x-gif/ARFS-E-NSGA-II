@@ -7,9 +7,7 @@ This directory is the single entry point for obtaining and verifying all ten dat
 ```bash
 python -m pip install -r requirements-lock.txt
 python -m pip install -e . --no-deps
-python -m pip install "openpyxl==3.1.5"
-python -m arfs_ensga2.cli prepare-geo --accession all
-python -m arfs_ensga2.cli prepare-legacy --dataset all
+python -m arfs_ensga2.cli prepare-data
 ```
 
 Generated files are written to `data/processed/`. Every matrix has a neighboring `*.manifest.json` containing source information, checksums, shape, class counts, grouping information, and preparation metadata.
@@ -45,6 +43,6 @@ Machine-readable identifiers, landing pages, expected processed checksums, and r
 
 ## Verification and rights
 
-After preparation, compare each generated `output_sha256` with `processed_sha256` in `dataset_manifest.csv`. Experiment `manifest.json` files record the same checksum, linking source, matrix, configuration, and result.
+During preparation, each generated `output_sha256` is automatically compared with `processed_sha256` in `dataset_manifest.csv`; a mismatch stops the command. Experiment `manifest.json` files record the same checksum, linking source, matrix, configuration, and result.
 
 Mendeley Data DOI `10.17632/fhx5zgx2zj.1` states CC BY-NC 3.0. GEO and ArrayExpress records come from their public repositories. The pinned mirror used for Colon and Leukemia has no declared redistribution license, so those files are downloaded from their fixed upstream URL rather than copied here. Users must follow the original providers' terms.

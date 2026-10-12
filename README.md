@@ -16,10 +16,15 @@ This repository keeps the implementation, experiment configurations, public-data
 | `tests/` | Unit and integration tests |
 | `.github/workflows/ci.yml` | Automated tests and an end-to-end reproducibility smoke run |
 | `REPRODUCIBILITY.md` | Clean-environment protocol for reproducing the experiments |
+| `PAPER_REPRODUCIBILITY.md` | Direct map from manuscript claims to code, commands, and evidence |
+| `paper/` | Machine-readable Table I identities, experimental contract, and reported aggregate targets |
 | `CONTRIBUTING.md` | English-language, portability, testing, and data-handling requirements |
 | `CITATION.cff` | Machine-readable software citation metadata |
+| `requirements-py38-lock.txt` | Locked dependencies for the manuscript's Python 3.8 runtime |
 
 Raw third-party files are not relicensed by this repository. The data commands retrieve the fixed public sources, validate their identities, and generate the analysis-ready matrices locally. See [`data/README.md`](data/README.md) and [`data/dataset_manifest.csv`](data/dataset_manifest.csv).
+
+The manuscript-to-repository dataset mapping is recorded separately in [`paper/dataset_table.csv`](paper/dataset_table.csv). It distinguishes manuscript GEO accessions from mirror-specific retrieval identifiers, so `GSE15471`/`E-GEOD-15471` and `GSE10072`/`E-GEOD-10072` cannot be mistaken for different datasets.
 
 ## Method coverage
 
@@ -61,29 +66,49 @@ python -m arfs_ensga2.cli audit --output results/demo
 
 The final two commands execute and audit a deterministic end-to-end smoke experiment. A successful audit prints `"status": "PASS"`.
 
+The manuscript reports Python 3.8. For that interpreter, install `requirements-py38-lock.txt` instead. Continuous integration tests Python 3.8, 3.10, and 3.11.
+
 ## Obtain the ten paper datasets
 
 ```bash
-python -m pip install "openpyxl==3.1.5"
-python -m arfs_ensga2.cli prepare-geo --accession all
-python -m arfs_ensga2.cli prepare-legacy --dataset all
+python -m arfs_ensga2.cli prepare-data
 ```
 
-These commands retrieve the fixed GEO, ArrayExpress, Mendeley Data, or commit-pinned source; validate checksums, dimensions, and class counts; preserve verified patient groups; and write an analysis-ready matrix plus provenance manifest for every dataset.
+This command retrieves the fixed GEO, ArrayExpress, Mendeley Data, or commit-pinned source; validates source and processed checksums, dimensions, and class counts; preserves verified patient groups; and writes an analysis-ready matrix plus a portable provenance manifest for every dataset. It exits with an error if any generated matrix differs from the hash in the public manifest.
 
 The source identifiers and expected processed-file hashes are recorded in [`data/dataset_manifest.csv`](data/dataset_manifest.csv). No row-order inference is used to create biological groups.
 
 ## Reproduce the proposed method
 
+From a clean clone, one command retrieves and verifies all data, runs the proposed method on all ten datasets, and audits every result directory:
+
+```bash
+python -m arfs_ensga2.cli reproduce
+```
+
+Use `--skip-data` to reuse already verified matrices. Add `--ablation` to run all eight component combinations.
+
+The equivalent experiment-only command is:
+
 ```bash
 python -m arfs_ensga2.cli suite --data-dir data/processed --output results/paper
 ```
 
-Run all eight component combinations:
+Reproduce the paper's eight-pattern ablation on Colon and SRBCT:
 
 ```bash
-python -m arfs_ensga2.cli suite --data-dir data/processed --output results/paper-ablation --ablation
+python -m arfs_ensga2.cli paper-ablation
 ```
+
+The broader `suite --ablation` command remains available for an additional, non-paper ablation across all ten datasets.
+
+Reproduce the paper's one-factor and two-factor parameter analysis on Colon and SRBCT:
+
+```bash
+python -m arfs_ensga2.cli paper-parameters
+```
+
+This writes a machine-readable `parameter_analysis_summary.csv` plus the complete fold-level evidence for every setting.
 
 The suite automatically uses `configs/grouped.yaml` for `Breast_cancer_2`, `Pancreatic_Cancer`, and `Lung_Adenocarcinoma`, and `configs/default.yaml` for the other datasets. Each dataset directory is audited before the command returns successfully.
 
@@ -95,6 +120,10 @@ python -m arfs_ensga2.cli ablation --data data/processed/Colon.csv.gz --config c
 ```
 
 Full repeated nested-CV runs are computationally expensive. Runtime depends on hardware and the number of variants; no reduced settings are silently substituted.
+
+## Paper-reported reference values
+
+The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43` selected features on average, mean redundancy `0.2213`, and mean end-to-end runtime `14.23` seconds for ARFS-E-NSGA-II. These are comparison targets, not pre-generated run evidence. Their provenance and interpretation limits are recorded in [`paper/reported_results.yaml`](paper/reported_results.yaml); fresh fold-level evidence is produced under `results/` by the commands above.
 
 ## Output contract
 
@@ -127,7 +156,7 @@ This repository implements the proposed method, the common NSGA-II backbone, all
 
 ## Continuous verification
 
-GitHub Actions runs under Python 3.10 and 3.11. It installs the locked environment, executes all tests, runs a deterministic end-to-end experiment, and independently audits the generated evidence. The test suite also checks public text files for Chinese-language content and machine-specific absolute paths. All source-code comments, messages, metadata, and public documentation are maintained in English.
+GitHub Actions runs under Python 3.8, 3.10, and 3.11. It installs the corresponding locked environment, executes all tests, runs a deterministic end-to-end experiment, and independently audits the generated evidence. The test suite also checks public text files for Chinese-language content and machine-specific absolute paths. All source-code comments, messages, metadata, and public documentation are maintained in English.
 
 ## License and data rights
 

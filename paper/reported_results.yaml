@@ -1,0 +1,37 @@
+provenance:
+  description: Values transcribed from the submitted manuscript PDF.
+  warning: These are reported aggregate targets, not raw or regenerated fold-level evidence.
+
+main_comparison:
+  paired_outer_folds_per_dataset: 25
+  arfs_e_nsga_ii:
+    mean_hypervolume: 1.2830
+    mean_hypervolume_rank: 1.30
+    hypervolume_outcomes:
+      highest: 7
+      tied_for_highest: 2
+      exceeded: 1
+    mean_selected_features: 3.43
+    mean_redundancy: 0.2213
+    mean_runtime_seconds: 14.23
+    mean_runtime_rank: 9.80
+
+interpretation_limits:
+  - The method does not have the highest average balanced accuracy.
+  - The method does not have the highest average Macro-F1.
+  - The main claim concerns the joint trade-off among predictive performance, subset size, redundancy, and Pareto-set coverage.
+  - Cross-dataset hypervolume averages and ranks are descriptive because objective distributions depend on the dataset.
+  - Ablation and parameter-analysis conclusions are limited to Colon and SRBCT.
+
+code_and_data_scope:
+  included:
+    - ARFS-E-NSGA-II implementation
+    - all eight component-ablation variants
+    - configuration files
+    - data-preparation utilities
+    - nested evaluation wrapper
+    - integrity audit
+    - automated tests
+  excluded:
+    - external literature baseline implementations
+  external_baseline_instruction: Integrate the original versioned implementations.

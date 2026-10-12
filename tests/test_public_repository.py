@@ -6,13 +6,15 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT_FILES = {
     "README.md",
     "REPRODUCIBILITY.md",
+    "PAPER_REPRODUCIBILITY.md",
     "CONTRIBUTING.md",
     "CITATION.cff",
     "results/README.md",
     "pyproject.toml",
     "requirements-lock.txt",
+    "requirements-py38-lock.txt",
 }
-PUBLIC_DIRECTORIES = ("src", "configs", "data", "tests", ".github")
+PUBLIC_DIRECTORIES = ("src", "configs", "data", "paper", "tests", ".github")
 TEXT_SUFFIXES = {
     ".cff",
     ".csv",
@@ -24,7 +26,7 @@ TEXT_SUFFIXES = {
     ".yaml",
     ".yml",
 }
-EXCLUDED_PARTS = {"raw", "processed", "__pycache__", ".pytest_cache"}
+EXCLUDED_PARTS = {"raw", "__pycache__", ".pytest_cache"}
 CHINESE_CHARACTER = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 WINDOWS_ABSOLUTE_PATH = re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/]")
 USER_ABSOLUTE_PATH = re.compile(r"/(?:home|Users)/[^\s/'\"]+")
@@ -40,6 +42,10 @@ def public_text_files() -> list[Path]:
             if path.is_file()
             and path.suffix.lower() in TEXT_SUFFIXES
             and not EXCLUDED_PARTS.intersection(path.relative_to(directory).parts)
+            and not any(
+                part.startswith("processed")
+                for part in path.relative_to(directory).parts
+            )
         )
     return sorted(set(files))
 

@@ -4,7 +4,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from arfs_ensga2.datasets import LegacySpec, _read_legacy, labels_and_groups, read_geo_metadata
+from arfs_ensga2.datasets import (
+    LegacySpec,
+    _read_legacy,
+    labels_and_groups,
+    load_processed_checksums,
+    read_geo_metadata,
+    sha256,
+    verify_processed_record,
+    write_reproducible_csv_gz,
+)
 
 
 def _write_metadata(path: Path, rows: list[list[str]]) -> None:
@@ -58,4 +67,37 @@ def test_legacy_xlsx_has_class_in_first_column(tmp_path: Path, monkeypatch):
     features, labels = _read_legacy(tmp_path / "example.xlsx", spec)
     assert features.shape == (2, 2)
     assert labels.tolist() == ["a", "b"]
+
+
+def test_processed_gzip_is_byte_reproducible(tmp_path: Path):
+    frame = pd.DataFrame({"feature_00000": [1.0, 2.0], "label": ["a", "b"]})
+    first = write_reproducible_csv_gz(frame, tmp_path / "first.csv.gz")
+    second = write_reproducible_csv_gz(frame, tmp_path / "second.csv.gz")
+    assert first.read_bytes() == second.read_bytes()
+
+
+def test_processed_manifest_is_enforced(tmp_path: Path):
+    output = write_reproducible_csv_gz(
+        pd.DataFrame({"feature_00000": [1.0], "label": ["a"]}),
+        tmp_path / "Toy.csv.gz",
+    )
+    manifest = tmp_path / "dataset_manifest.csv"
+    manifest.write_text(
+        f"dataset,processed_sha256\nToy,{sha256(output)}\n",
+        encoding="utf-8",
+    )
+    checksums = load_processed_checksums(manifest)
+    record = {
+        "spec": {"public_name": "Toy"},
+        "output_sha256": sha256(output),
+    }
+    verify_processed_record(record, checksums)
+
+    record["output_sha256"] = "0" * 64
+    try:
+        verify_processed_record(record, checksums)
+    except ValueError as error:
+        assert "processed checksum mismatch" in str(error)
+    else:
+        raise AssertionError("checksum mismatch was not rejected")
 

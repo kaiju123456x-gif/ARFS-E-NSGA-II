@@ -1,0 +1,11 @@
+paper_label,repository_name,samples,features,classes,linked_groups,study_or_processed_matrix_source,paper_accession,retrieval_identifier
+Lung cancer,Lung_cancer,111,54675,2,,Bild et al. 2006 (ADC/SCC; GPL570),GSE3141,GSE3141
+Brain Tumor,Brain_Tumor,180,54613,4,,Sun et al. 2006 (glioma; GPL570),GSE4290,GSE4290
+Breast cancer 1,Breast_cancer_1,97,24481,2,,van't Veer et al. 2002; Mendeley Data benchmark,Not deposited,10.17632/fhx5zgx2zj.1
+Breast cancer 2,Breast_cancer_2,104,22283,2,52,Chowdary et al. 2006 (breast/colon; GPL96),GSE3726,GSE3726
+Pancreatic Cancer,Pancreatic_Cancer,78,54675,2,36,Badea et al. 2009 (PDAC/normal; GPL570),GSE15471,E-GEOD-15471
+Leukemia,Leukemia,72,7129,2,,Golub et al. 1999; commit-pinned benchmark,Not deposited,commit-pinned mirror
+Lung Adenocarcinoma,Lung_Adenocarcinoma,107,22283,2,74,Landi et al. 2008 (tumor/normal; GPL96),GSE10072,E-GEOD-10072
+Colon,Colon,62,2000,2,,Alon et al. 1999; commit-pinned benchmark,Not deposited,commit-pinned mirror
+SRBCT,SRBCT,83,2308,4,,Khan et al. 2001; Mendeley Data benchmark,Not deposited,10.17632/fhx5zgx2zj.1
+11 Tumor,11_Tumor,174,12533,11,,Su et al. 2001; Mendeley Data benchmark,Not deposited,10.17632/fhx5zgx2zj.1

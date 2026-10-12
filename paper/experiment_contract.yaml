@@ -1,0 +1,171 @@
+manuscript:
+  title: Adaptive Redundancy-Aware Feature Selection with Enhanced Evolutionary Search Based on NSGA-II
+  reported_python: "3.8"
+  reported_hardware:
+    cpu: Intel Core i5-1135G7 at 2.40 GHz
+    memory_gb: 16
+
+datasets:
+  - name: Lung_cancer
+    paper_label: Lung cancer
+    samples: 111
+    features: 54675
+    classes: 2
+    accession: GSE3141
+    grouped: false
+  - name: Brain_Tumor
+    paper_label: Brain Tumor
+    samples: 180
+    features: 54613
+    classes: 4
+    accession: GSE4290
+    grouped: false
+  - name: Breast_cancer_1
+    paper_label: Breast cancer 1
+    samples: 97
+    features: 24481
+    classes: 2
+    accession: Not deposited
+    processed_matrix_source: 10.17632/fhx5zgx2zj.1
+    grouped: false
+  - name: Breast_cancer_2
+    paper_label: Breast cancer 2
+    samples: 104
+    features: 22283
+    classes: 2
+    accession: GSE3726
+    grouped: true
+    groups: 52
+  - name: Pancreatic_Cancer
+    paper_label: Pancreatic Cancer
+    samples: 78
+    features: 54675
+    classes: 2
+    accession: GSE15471
+    retrieval_identifier: E-GEOD-15471
+    grouped: true
+    groups: 36
+  - name: Leukemia
+    paper_label: Leukemia
+    samples: 72
+    features: 7129
+    classes: 2
+    accession: Not deposited
+    processed_matrix_source: Golub benchmark, commit-pinned mirror
+    grouped: false
+  - name: Lung_Adenocarcinoma
+    paper_label: Lung Adenocarcinoma
+    samples: 107
+    features: 22283
+    classes: 2
+    accession: GSE10072
+    retrieval_identifier: E-GEOD-10072
+    grouped: true
+    groups: 74
+  - name: Colon
+    paper_label: Colon
+    samples: 62
+    features: 2000
+    classes: 2
+    accession: Not deposited
+    processed_matrix_source: Alon benchmark, commit-pinned mirror
+    grouped: false
+  - name: SRBCT
+    paper_label: SRBCT
+    samples: 83
+    features: 2308
+    classes: 4
+    accession: Not deposited
+    processed_matrix_source: 10.17632/fhx5zgx2zj.1
+    grouped: false
+  - name: 11_Tumor
+    paper_label: 11 Tumor
+    samples: 174
+    features: 12533
+    classes: 11
+    accession: Not deposited
+    processed_matrix_source: 10.17632/fhx5zgx2zj.1
+    grouped: false
+
+protocol:
+  outer_splits: 5
+  outer_repeats: 5
+  inner_splits: 3
+  base_seed: 2026
+  candidate_features: 30
+  preprocessing:
+    imputation: outer-training median
+    scaling: outer-training min-max
+    screening: outer-training ANOVA F-score
+  classifier:
+    name: KNeighborsClassifier
+    n_neighbors: 3
+    weights: distance
+  objectives:
+    - inner-CV balanced error
+    - selected-feature ratio over the 30-feature candidate pool
+    - mean pairwise mutual-information redundancy
+  endpoint_rule: lexicographic minimum of training error, feature ratio, and redundancy
+  hypervolume_reference: [1.1, 1.1, 1.1]
+  redundancy_transform: z / (1 + z)
+
+optimizer:
+  population_size: 12
+  evaluation_budget: 240
+  crossover_probability: 0.8
+  mutation_probability: 0.12
+  archive_capacity: 50
+  window_size: 10
+  rho: 0.2
+  alpha: 0.35
+  monitor_interval: 5
+  mi_threshold: 0.0
+  initialization_top_k: 10
+
+comparison_methods:
+  multi_objective:
+    - MOPSO
+    - NSGA-II
+    - NSGA-III
+    - HMO-NSGA-II
+    - FTGGA
+    - MMODE
+    - MOMOGS-PCE
+    - XGBoost-MOGA
+    - ARFS-E-NSGA-II
+  single_subset:
+    - HSIC Lasso
+    - Block HSIC Lasso
+
+hsic_baselines:
+  regularization: [0.0001, 0.01, 1.0]
+  gaussian_bandwidth_factor: 1
+  candidate_subset_sizes: [5, 10, 20]
+  block_hsic_block_sizes: [5, 10]
+  stratified_kernel_sample_cap: 250
+
+ablation:
+  datasets: [Colon, SRBCT]
+  variants:
+    - {repository_id: none, paper_label: BASE, components: []}
+    - {repository_id: a, paper_label: A, components: [A]}
+    - {repository_id: b, paper_label: B, components: [B]}
+    - {repository_id: c, paper_label: C, components: [C]}
+    - {repository_id: ab, paper_label: AB, components: [A, B]}
+    - {repository_id: ac, paper_label: AC, components: [A, C]}
+    - {repository_id: bc, paper_label: BC, components: [B, C]}
+    - {repository_id: abc, paper_label: ABC, components: [A, B, C]}
+
+parameter_analysis:
+  datasets: [Colon, SRBCT]
+  one_factor:
+    mutation_probability: [0.05, 0.12, 0.2]
+    window_size: [3, 5, 10]
+    rho: [0.05, 0.2, 0.5]
+    alpha: [0.0, 0.35, 0.75]
+    monitor_interval: [3, 5, 10]
+    mi_threshold: [0.0, 0.5]
+    archive_capacity: [20, 50]
+  interactions:
+    - [window_size, rho]
+    - [alpha, monitor_interval]
