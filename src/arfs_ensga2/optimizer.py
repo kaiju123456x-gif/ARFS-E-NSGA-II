@@ -101,11 +101,28 @@ class ARFSENSGA2:
                 self._none_counter[population[i].tobytes()] = 0
         return conv, div, none
 
-    def _mutation_state(self, igd_history: list[float]) -> tuple[float, str, bool]:
+    @staticmethod
+    def _aligned_igd_increment(
+        previous_archive: np.ndarray,
+        current_archive: np.ndarray,
+        reference_points: np.ndarray,
+        lower: np.ndarray,
+        upper: np.ndarray,
+    ) -> tuple[float, float, float]:
+        """Evaluate consecutive archives under one reference set and scaling."""
+        previous = igd(previous_archive, reference_points, lower, upper)
+        current = igd(current_archive, reference_points, lower, upper)
+        return previous, current, current - previous
+
+    def _mutation_state(
+        self,
+        igd_history: list[float],
+        aligned_increments: list[float],
+    ) -> tuple[float, str, bool]:
         cfg = self.config
         if len(igd_history) < 3:
             return cfg.mutation_probability, "bidirectional", False
-        increments = np.diff(igd_history[-cfg.window_size :])
+        increments = np.asarray(aligned_increments[-cfg.window_size :], dtype=float)
         scale = max(float(np.std(increments)), cfg.std_floor)
         stagnant = abs(float(increments[-1])) < cfg.rho * scale
         if stagnant:
@@ -158,6 +175,7 @@ class ARFSENSGA2:
         archive_masks: np.ndarray,
         archive_objectives: np.ndarray,
         igd_history: list[float],
+        aligned_igd_increments: list[float],
         preferred: int,
     ) -> tuple[np.ndarray, dict[str, object]]:
         conv, div, none = self._partition(
@@ -174,7 +192,9 @@ class ARFSENSGA2:
                 max_distance = max(distances[idx] for idx in div)
                 chosen = min(idx for idx in div if distances[idx] == max_distance)
             parents.append(population[chosen])
-        probability, bias, stagnant = self._mutation_state(igd_history)
+        probability, bias, stagnant = self._mutation_state(
+            igd_history, aligned_igd_increments
+        )
         offspring = self._crossover_and_mutate(
             np.asarray(parents), probability, bias, preferred
         )
@@ -276,6 +296,8 @@ class ARFSENSGA2:
         lower = np.min(objectives, axis=0)
         upper = np.max(objectives, axis=0)
         igd_history = [igd(archive_objectives, reference_points, lower, upper)]
+        aligned_igd_increments: list[float] = []
+        igd_alignment_history: list[dict[str, object]] = []
         correlations = self._correlation_matrix(X)
         generations: list[dict[str, object]] = []
         generation = 0
@@ -288,6 +310,7 @@ class ARFSENSGA2:
                     archive_masks,
                     archive_objectives,
                     igd_history,
+                    aligned_igd_increments,
                     preferred,
                 )
             else:
@@ -307,6 +330,7 @@ class ARFSENSGA2:
                 np.vstack([objectives, offspring_objectives]),
                 self.config.population_size,
             )
+            previous_archive_objectives = archive_objectives.copy()
             archive_masks, archive_objectives = truncate_archive(
                 np.vstack([archive_masks, offspring]),
                 np.vstack([archive_objectives, offspring_objectives]),
@@ -317,13 +341,34 @@ class ARFSENSGA2:
             )
             lower = np.minimum(lower, np.min(offspring_objectives, axis=0))
             upper = np.maximum(upper, np.max(offspring_objectives, axis=0))
-            igd_history.append(igd(archive_objectives, reference_points, lower, upper))
+            previous_igd, current_igd, igd_increment = self._aligned_igd_increment(
+                previous_archive_objectives,
+                archive_objectives,
+                reference_points,
+                lower,
+                upper,
+            )
+            igd_history.append(current_igd)
+            aligned_igd_increments.append(igd_increment)
+            igd_alignment_history.append(
+                {
+                    "generation": generation,
+                    "previous_igd": previous_igd,
+                    "current_igd": current_igd,
+                    "increment": igd_increment,
+                    "reference_size": len(reference_points),
+                    "lower": lower.copy(),
+                    "upper": upper.copy(),
+                }
+            )
             generations.append(
                 {
                     "generation": generation,
                     "evaluations": evaluator.calls,
                     "archive_size": len(archive_masks),
-                    "igd": igd_history[-1],
+                    "igd": current_igd,
+                    "previous_igd_aligned": previous_igd,
+                    "igd_increment": igd_increment,
                     "search": search_info,
                     "drfm": drfm_info,
                 }
@@ -341,6 +386,8 @@ class ARFSENSGA2:
             },
             "initialization": init_diagnostics,
             "igd_history": igd_history,
+            "aligned_igd_increments": aligned_igd_increments,
+            "igd_alignment_history": igd_alignment_history,
             "generations": generations,
             "pairwise_mi_cache_size": len(evaluator._pair_mi),
         }

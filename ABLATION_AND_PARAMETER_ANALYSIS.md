@@ -35,7 +35,7 @@ The letters denote component **packages**, not single operators.
 | Package | Manuscript definition | Main implementation |
 |---|---|---|
 | A | Multi-source guided initialization combining ReliefF, mutual information, chi-square, F-score, and random-forest importance with validation-performance softmax weights | `src/arfs_ensga2/initialization.py` |
-| B | DPIM search control: archive-relative population partitioning, differential parent selection, IGD-adaptive mutation, bidirectional or sparsity-biased mutation, and cumulative IGD reference handling | `src/arfs_ensga2/optimizer.py` |
+| B | DPIM search control: archive-relative population partitioning, differential parent selection, IGD-adaptive mutation, bidirectional or sparsity-biased mutation, and aligned running-reference IGD increments | `src/arfs_ensga2/optimizer.py` |
 | C | DRFM redundancy refinement: periodic population-level feature-usage monitoring and individual-level redundancy-relevance exchange | `src/arfs_ensga2/optimizer.py` |
 
 The eight variants form the complete 2 x 2 x 2 activation design:

@@ -25,7 +25,7 @@ This file maps every experimental claim in the manuscript to a public, inspectab
 | `archives.csv` | Training-side Pareto sets underlying hypervolume |
 | `summary.csv` | Per-method or per-variant aggregate metrics |
 | `splits.json` | Fixed outer/inner indices and candidate-feature identities |
-| `diagnostics/*.json` | DPIM state, IGD history, DRFM monitoring, and swaps |
+| `diagnostics/*.json` | DPIM state, current IGD history, aligned consecutive-archive IGD increments, their shared reference size and normalization bounds, DRFM monitoring, and swaps |
 | `manifest.json` | Dataset hash, exact configuration, software versions, and platform |
 | `audit_report.json` | Automated completeness and integrity verdict |
 

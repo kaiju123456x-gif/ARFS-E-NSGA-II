@@ -179,7 +179,7 @@ The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43`
 | `summary.csv` | Mean and sample standard deviation across outer folds |
 | `splits.json` | Outer/inner indices and training-only ANOVA candidate sets |
 | `manifest.json` | Input checksum, class counts, missingness, configuration, and environment |
-| `diagnostics/*.json` | IGD trace, DPIM state, DRFM swaps, and feature monitoring |
+| `diagnostics/*.json` | IGD trace, aligned consecutive-archive IGD increments, shared reference/bound evidence, DPIM state, DRFM swaps, and feature monitoring |
 | `audit_report.json` | Machine-readable integrity verdict |
 
 ## Exact implementation decisions
@@ -191,6 +191,7 @@ The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43`
 | Initialization validation subset | Top 10 features per source |
 | Ties | Stable order followed by the smallest feature index |
 | RED estimator | Seeded `sklearn.feature_selection.mutual_info_regression` with an on-demand symmetric cache |
+| IGD increment | Consecutive archives are both recomputed with the latest cumulative reference set and the same latest normalization bounds before subtraction |
 | Linked samples | The same group identifier is excluded across both outer and inner folds |
 
 Every run stores these settings and its input checksum in `manifest.json`.
