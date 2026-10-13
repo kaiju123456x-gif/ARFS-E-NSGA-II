@@ -124,11 +124,3 @@ fold observations. The current command preserves all observations needed to
 reconstruct them, but it does not automatically typeset those figures or the
 significance table.
 
-One wording difference must also remain explicit. Table VIII of the manuscript
-describes package B as including "error-weighted crowding." The public code uses
-standard normalized NSGA-II crowding distance for tournament and environmental
-selection; the manuscript does not give a separate mathematical definition or
-weight for an error-weighted variant. Therefore this repository does not claim
-an unimplemented weighting rule. The manuscript wording or the implementation
-specification should be reconciled before treating the two as exact equivalents.
-
