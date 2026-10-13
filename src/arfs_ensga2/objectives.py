@@ -42,10 +42,17 @@ class ObjectiveEvaluator:
     def _pairwise_mi(self, i: int, j: int) -> float:
         key = (min(i, j), max(i, j))
         if key not in self._pair_mi:
-            value = mutual_info_regression(
+            # Mutual information is symmetric, but the finite-sample k-NN
+            # estimator need not return identical values after swapping the
+            # predictor and response. Average both directions so the code
+            # implements the symmetric I(f_i; f_j) quantity in Eq. (7).
+            forward = mutual_info_regression(
                 self.X[:, [key[0]]], self.X[:, key[1]], random_state=self.seed
             )[0]
-            self._pair_mi[key] = float(max(0.0, value))
+            reverse = mutual_info_regression(
+                self.X[:, [key[1]]], self.X[:, key[0]], random_state=self.seed
+            )[0]
+            self._pair_mi[key] = float(max(0.0, (forward + reverse) / 2.0))
         return self._pair_mi[key]
 
     def redundancy(self, selected: np.ndarray) -> float:

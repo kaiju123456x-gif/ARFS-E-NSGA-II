@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.datasets import make_classification
 
 from arfs_ensga2.config import OptimizerConfig
-from arfs_ensga2.objectives import make_inner_splits
+from arfs_ensga2.objectives import ObjectiveEvaluator, make_inner_splits
 from arfs_ensga2.optimizer import ARFSENSGA2
 from arfs_ensga2.pareto import igd
 
@@ -85,4 +85,27 @@ def test_optimizer_records_aligned_igd_evidence():
     ]
     for record in records:
         assert record["increment"] == record["current_igd"] - record["previous_igd"]
+
+
+def test_pairwise_mutual_information_is_symmetric(monkeypatch):
+    X = np.column_stack(
+        [np.arange(12, dtype=float), np.arange(12, dtype=float) ** 2]
+    )
+    y = np.tile([0, 1], 6)
+    splits = make_inner_splits(X, y, 3, 7)
+    calls = []
+
+    def directional_estimator(predictor, response, random_state):
+        calls.append((predictor[:, 0].copy(), response.copy(), random_state))
+        value = 1.0 if np.array_equal(predictor[:, 0], X[:, 0]) else 3.0
+        return np.array([value])
+
+    monkeypatch.setattr(
+        "arfs_ensga2.objectives.mutual_info_regression", directional_estimator
+    )
+    evaluator = ObjectiveEvaluator(X, y, splits, original_dimension=2, seed=11)
+
+    assert evaluator._pairwise_mi(0, 1) == 2.0
+    assert evaluator._pairwise_mi(1, 0) == 2.0
+    assert len(calls) == 2
 
