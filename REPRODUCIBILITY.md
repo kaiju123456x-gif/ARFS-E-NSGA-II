@@ -71,7 +71,9 @@ python -m arfs_ensga2.cli paper-parameters
 
 ## 5. Evidence audit
 
-The suite audits every dataset. For a single result directory:
+The suite is designed to audit each dataset directory that it generates. The
+repository does not include completed paper-scale result directories or a
+paper-wide audit report. To audit a locally generated result directory:
 
 ```bash
 python -m arfs_ensga2.cli audit --output results/paper/Colon
@@ -84,7 +86,7 @@ python -m arfs_ensga2.cli audit --output results/paper/Colon
 | `fold_results.csv` | Predictive, subset, redundancy, and runtime summaries |
 | `archives.csv` | Pareto archives and hypervolume inputs |
 | `diagnostics/*.json` | DPIM and DRFM behavior |
-| `audit_report.json` | Machine-readable integrity verdict |
+| `audit_report.json` | Machine-readable verdict for the locally generated directory |
 
 ## 6. Determinism
 

@@ -18,7 +18,8 @@ This repository keeps the implementation, experiment configurations, public-data
 | `REPRODUCIBILITY.md` | Clean-environment protocol for reproducing the experiments |
 | `PAPER_REPRODUCIBILITY.md` | Direct map from manuscript claims to code, commands, and evidence |
 | `ABLATION_AND_PARAMETER_ANALYSIS.md` | A/B/C definitions, parameter meanings, tested grids, run counts, outputs, and evidence limits |
-| `paper/` | Machine-readable Table I identities, experimental contract, and reported aggregate targets |
+| `paper/` | Machine-readable Table I identities, experimental contract, and manuscript-reported aggregate targets; not a completed result archive |
+| `results/` | Instructions and the default location for locally generated outputs; full paper-run outputs are not bundled |
 | `CONTRIBUTING.md` | English-language, portability, testing, and data-handling requirements |
 | `CITATION.cff` | Machine-readable software citation metadata |
 | `requirements-py38-lock.txt` | Locked dependencies for the manuscript's Python 3.8 runtime |
@@ -55,7 +56,7 @@ flowchart LR
   HMO-NSGA-II reimplementation.
 - Repeated nested stratified CV, with group-aware splitting for linked biological samples.
 - Exact three-dimensional hypervolume with reference point `(1.1, 1.1, 1.1)`.
-- Machine-readable folds, candidate sets, seeds, diagnostics, Pareto archives, checksums, and environment metadata.
+- Reproduction commands generate machine-readable folds, candidate sets, seeds, diagnostics, Pareto archives, checksums, and environment metadata.
 
 ### What population size 12 means
 
@@ -137,7 +138,7 @@ The same analysis guide defines every parameter, default, tested value, two-fact
 grid, run count, and the boundary between fresh evidence and manuscript-reported
 presentation artifacts.
 
-The suite automatically uses `configs/grouped.yaml` for `Breast_cancer_2`, `Pancreatic_Cancer`, and `Lung_Adenocarcinoma`, and `configs/default.yaml` for the other datasets. Each dataset directory is audited before the command returns successfully.
+The suite automatically uses `configs/grouped.yaml` for `Breast_cancer_2`, `Pancreatic_Cancer`, and `Lung_Adenocarcinoma`, and `configs/default.yaml` for the other datasets. When executed, the command audits each newly generated dataset directory before returning successfully.
 
 For a single dataset:
 
@@ -170,6 +171,15 @@ Full repeated nested-CV runs are computationally expensive. Runtime depends on h
 
 The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43` selected features on average, mean redundancy `0.2213`, and mean end-to-end runtime `14.23` seconds for ARFS-E-NSGA-II. These are comparison targets, not pre-generated run evidence. Their provenance and interpretation limits are recorded in [`paper/reported_results.yaml`](paper/reported_results.yaml); fresh fold-level evidence is produced under `results/` by the commands above.
 
+### Result-availability boundary
+
+The repository currently provides the code, fixed configurations, data-retrieval
+workflow, tests, and audit utility. It does **not** bundle the complete
+paper-scale fold-level result directories or their corresponding audit reports.
+Accordingly, references to an audit describe checks applied to outputs generated
+by the commands above; the continuous-integration badge covers tests and a small
+deterministic smoke run, not an independent audit of every manuscript result.
+
 ## Output contract
 
 | File | Reproducibility evidence |
@@ -180,7 +190,7 @@ The manuscript reports a mean hypervolume of `1.2830` (mean rank `1.30`), `3.43`
 | `splits.json` | Outer/inner indices and training-only ANOVA candidate sets |
 | `manifest.json` | Input checksum, class counts, missingness, configuration, and environment |
 | `diagnostics/*.json` | IGD trace, aligned consecutive-archive IGD increments, shared reference/bound evidence, DPIM state, DRFM swaps, and feature monitoring |
-| `audit_report.json` | Machine-readable integrity verdict |
+| `audit_report.json` | Integrity verdict generated locally for that result directory; no paper-wide report is prepackaged |
 
 ## Exact implementation decisions
 

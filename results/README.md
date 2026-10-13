@@ -2,6 +2,10 @@
 
 Experiment outputs are generated locally because full repeated nested cross-validation is computationally expensive. Do not edit result files manually.
 
+This repository does not bundle the complete paper-scale results or their audit
+reports. This directory documents the expected layout and is the default output
+location for new reproduction runs.
+
 ```bash
 python -m arfs_ensga2.cli suite --data-dir data/processed --output results/paper
 ```
