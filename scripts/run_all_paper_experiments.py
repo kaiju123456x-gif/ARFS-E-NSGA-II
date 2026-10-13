@@ -204,11 +204,25 @@ def main() -> None:
         choices=("comparison", "ablation", "parameters"),
         help="repeat to select phases; default runs all phases",
     )
+    parser.add_argument(
+        "--dataset",
+        action="append",
+        choices=PAPER_DATASETS,
+        help="repeat to restrict tasks to selected datasets",
+    )
     parser.add_argument("--workers", type=int, default=3)
     args = parser.parse_args()
     root = args.root.resolve()
     phases = set(args.phase or ("comparison", "ablation", "parameters"))
     tasks = _tasks(root, phases)
+    if args.dataset:
+        selected_datasets = set(args.dataset)
+        tasks = [
+            task
+            for task in tasks
+            if Path(str(task["data"])).name.removesuffix(".csv.gz")
+            in selected_datasets
+        ]
     os.environ.setdefault("LOKY_MAX_CPU_COUNT", str(os.cpu_count() or 1))
 
     statuses: list[dict[str, object]] = []
