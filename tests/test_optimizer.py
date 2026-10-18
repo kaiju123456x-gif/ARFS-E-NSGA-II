@@ -97,7 +97,7 @@ def test_pairwise_mutual_information_is_symmetric(monkeypatch):
 
     def directional_estimator(predictor, response, random_state):
         calls.append((predictor[:, 0].copy(), response.copy(), random_state))
-        value = 1.0 if np.array_equal(predictor[:, 0], X[:, 0]) else 3.0
+        value = 1.0 if len(calls) == 1 else 3.0
         return np.array([value])
 
     monkeypatch.setattr(
