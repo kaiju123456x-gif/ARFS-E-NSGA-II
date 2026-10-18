@@ -38,3 +38,18 @@ D:\chatgpt\envs\research\Scripts\python.exe scripts\run_all_paper_experiments.py
 
 Results are written under `results/paper_complete/`. Failures are retained with
 their traceback and are never silently retried within the same invocation.
+
+## Completed archive
+
+The complete run contains 86 audited tasks, 5,000 method-fold result rows, and
+2,150 split records. Generate or refresh the final aggregate tables and archive
+validation report with:
+
+```powershell
+D:\chatgpt\envs\research\Scripts\python.exe scripts\summarize_completed_experiments.py
+```
+
+The principal entry point for reviewing the completed run is
+`results/paper_complete/summary/experiment_validation_report.md`. An audit
+`PASS` establishes archive completeness and protocol integrity; it does not by
+itself assert agreement with numerical values produced by historical code.
